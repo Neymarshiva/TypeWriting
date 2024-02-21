@@ -10,6 +10,59 @@
 
 import followIfLoginRedirect from './components/api-authorization/followIfLoginRedirect';
 
+export class BatchTimmingsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getBatchTimmings(): Promise<BatchTimmingsDto[]> {
+        let url_ = this.baseUrl + "/api/BatchTimmings";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetBatchTimmings(_response);
+        });
+    }
+
+    protected processGetBatchTimmings(response: Response): Promise<BatchTimmingsDto[]> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(BatchTimmingsDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BatchTimmingsDto[]>(null as any);
+    }
+}
+
 export class MachinesClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -159,6 +212,180 @@ export class MachinesClient {
     }
 
     protected processDeleteMachines(response: Response): Promise<void> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export class StudentsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getStudentsWithPagination(pageNumber: number, pageSize: number, gender: number | null | undefined, batchTimingsId: number | null | undefined, machinesId: number | null | undefined, searchTerm: string | null | undefined): Promise<PaginatedListOfStudentsBriefDto> {
+        let url_ = this.baseUrl + "/api/Students?";
+        if (pageNumber === undefined || pageNumber === null)
+            throw new Error("The parameter 'pageNumber' must be defined and cannot be null.");
+        else
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === undefined || pageSize === null)
+            throw new Error("The parameter 'pageSize' must be defined and cannot be null.");
+        else
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (gender !== undefined && gender !== null)
+            url_ += "Gender=" + encodeURIComponent("" + gender) + "&";
+        if (batchTimingsId !== undefined && batchTimingsId !== null)
+            url_ += "BatchTimingsId=" + encodeURIComponent("" + batchTimingsId) + "&";
+        if (machinesId !== undefined && machinesId !== null)
+            url_ += "MachinesId=" + encodeURIComponent("" + machinesId) + "&";
+        if (searchTerm !== undefined && searchTerm !== null)
+            url_ += "SearchTerm=" + encodeURIComponent("" + searchTerm) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetStudentsWithPagination(_response);
+        });
+    }
+
+    protected processGetStudentsWithPagination(response: Response): Promise<PaginatedListOfStudentsBriefDto> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PaginatedListOfStudentsBriefDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PaginatedListOfStudentsBriefDto>(null as any);
+    }
+
+    createStudents(command: CreateStudentCommand): Promise<number> {
+        let url_ = this.baseUrl + "/api/Students";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateStudents(_response);
+        });
+    }
+
+    protected processCreateStudents(response: Response): Promise<number> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    updateStudents(id: number, command: UpdateStudentCommand): Promise<void> {
+        let url_ = this.baseUrl + "/api/Students/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateStudents(_response);
+        });
+    }
+
+    protected processUpdateStudents(response: Response): Promise<void> {
+        followIfLoginRedirect(response);
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    deleteStudents(id: number): Promise<void> {
+        let url_ = this.baseUrl + "/api/Students/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteStudents(_response);
+        });
+    }
+
+    protected processDeleteStudents(response: Response): Promise<void> {
         followIfLoginRedirect(response);
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
@@ -594,10 +821,51 @@ export class WeatherForecastsClient {
     }
 }
 
+export class BatchTimmingsDto implements IBatchTimmingsDto {
+    id?: number;
+    timings?: string;
+
+    constructor(data?: IBatchTimmingsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.timings = _data["timings"];
+        }
+    }
+
+    static fromJS(data: any): BatchTimmingsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BatchTimmingsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["timings"] = this.timings;
+        return data;
+    }
+}
+
+export interface IBatchTimmingsDto {
+    id?: number;
+    timings?: string;
+}
+
 export class MachinesDto implements IMachinesDto {
     id?: number;
     machineNumber?: string;
-    languagesId?: number;
+    languageId?: number;
+    lanuagesType?: string;
 
     constructor(data?: IMachinesDto) {
         if (data) {
@@ -612,7 +880,8 @@ export class MachinesDto implements IMachinesDto {
         if (_data) {
             this.id = _data["id"];
             this.machineNumber = _data["machineNumber"];
-            this.languagesId = _data["languagesId"];
+            this.languageId = _data["languageId"];
+            this.lanuagesType = _data["lanuagesType"];
         }
     }
 
@@ -627,7 +896,8 @@ export class MachinesDto implements IMachinesDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["machineNumber"] = this.machineNumber;
-        data["languagesId"] = this.languagesId;
+        data["languageId"] = this.languageId;
+        data["lanuagesType"] = this.lanuagesType;
         return data;
     }
 }
@@ -635,7 +905,8 @@ export class MachinesDto implements IMachinesDto {
 export interface IMachinesDto {
     id?: number;
     machineNumber?: string;
-    languagesId?: number;
+    languageId?: number;
+    lanuagesType?: string;
 }
 
 export class CreateMachinesCommand implements ICreateMachinesCommand {
@@ -720,6 +991,284 @@ export interface IUpdateMachinesCommand {
     id?: number;
     machineNumber?: string;
     languageId?: number;
+}
+
+export class PaginatedListOfStudentsBriefDto implements IPaginatedListOfStudentsBriefDto {
+    items?: StudentsBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+
+    constructor(data?: IPaginatedListOfStudentsBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(StudentsBriefDto.fromJS(item));
+            }
+            this.pageNumber = _data["pageNumber"];
+            this.totalPages = _data["totalPages"];
+            this.totalCount = _data["totalCount"];
+            this.hasPreviousPage = _data["hasPreviousPage"];
+            this.hasNextPage = _data["hasNextPage"];
+        }
+    }
+
+    static fromJS(data: any): PaginatedListOfStudentsBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PaginatedListOfStudentsBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["pageNumber"] = this.pageNumber;
+        data["totalPages"] = this.totalPages;
+        data["totalCount"] = this.totalCount;
+        data["hasPreviousPage"] = this.hasPreviousPage;
+        data["hasNextPage"] = this.hasNextPage;
+        return data;
+    }
+}
+
+export interface IPaginatedListOfStudentsBriefDto {
+    items?: StudentsBriefDto[];
+    pageNumber?: number;
+    totalPages?: number;
+    totalCount?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+export class StudentsBriefDto implements IStudentsBriefDto {
+    id?: number;
+    machinesId?: number;
+    machinesNumber?: string | undefined;
+    batchTimingsId?: number;
+    timings?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
+
+    constructor(data?: IStudentsBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.machinesId = _data["machinesId"];
+            this.machinesNumber = _data["machinesNumber"];
+            this.batchTimingsId = _data["batchTimingsId"];
+            this.timings = _data["timings"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.email = _data["email"];
+            this.mobileNumber = _data["mobileNumber"];
+            this.gender = _data["gender"];
+            this.address = _data["address"];
+        }
+    }
+
+    static fromJS(data: any): StudentsBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StudentsBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["machinesId"] = this.machinesId;
+        data["machinesNumber"] = this.machinesNumber;
+        data["batchTimingsId"] = this.batchTimingsId;
+        data["timings"] = this.timings;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["email"] = this.email;
+        data["mobileNumber"] = this.mobileNumber;
+        data["gender"] = this.gender;
+        data["address"] = this.address;
+        return data;
+    }
+}
+
+export interface IStudentsBriefDto {
+    id?: number;
+    machinesId?: number;
+    machinesNumber?: string | undefined;
+    batchTimingsId?: number;
+    timings?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
+}
+
+export enum Gender {
+    Male = 1,
+    Female = 2,
+    Others = 3,
+}
+
+export class CreateStudentCommand implements ICreateStudentCommand {
+    machinesId?: number;
+    batchTimingsId?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
+
+    constructor(data?: ICreateStudentCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.machinesId = _data["machinesId"];
+            this.batchTimingsId = _data["batchTimingsId"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.email = _data["email"];
+            this.mobileNumber = _data["mobileNumber"];
+            this.gender = _data["gender"];
+            this.address = _data["address"];
+        }
+    }
+
+    static fromJS(data: any): CreateStudentCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateStudentCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["machinesId"] = this.machinesId;
+        data["batchTimingsId"] = this.batchTimingsId;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["email"] = this.email;
+        data["mobileNumber"] = this.mobileNumber;
+        data["gender"] = this.gender;
+        data["address"] = this.address;
+        return data;
+    }
+}
+
+export interface ICreateStudentCommand {
+    machinesId?: number;
+    batchTimingsId?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
+}
+
+export class UpdateStudentCommand implements IUpdateStudentCommand {
+    id?: number;
+    machinesId?: number;
+    batchTimingsId?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
+
+    constructor(data?: IUpdateStudentCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.machinesId = _data["machinesId"];
+            this.batchTimingsId = _data["batchTimingsId"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.email = _data["email"];
+            this.mobileNumber = _data["mobileNumber"];
+            this.gender = _data["gender"];
+            this.address = _data["address"];
+        }
+    }
+
+    static fromJS(data: any): UpdateStudentCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateStudentCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["machinesId"] = this.machinesId;
+        data["batchTimingsId"] = this.batchTimingsId;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["email"] = this.email;
+        data["mobileNumber"] = this.mobileNumber;
+        data["gender"] = this.gender;
+        data["address"] = this.address;
+        return data;
+    }
+}
+
+export interface IUpdateStudentCommand {
+    id?: number;
+    machinesId?: number;
+    batchTimingsId?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    mobileNumber?: number;
+    gender?: Gender;
+    address?: string | undefined;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
